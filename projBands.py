@@ -3,38 +3,39 @@ import numpy as np
 import pandas as pd
 """
 Orbital Order
-  Order of m-components for each l in the output:
-     1, cos(phi), sin(phi), cos(2*phi), sin(2*phi), .., cos(l*phi), sin(l*phi)
- where phi is the polar angle:
+ Order of m-components for each l in the output:
+    1, cos(phi), sin(phi), cos(2*phi), sin(2*phi), .., cos(l*phi), sin(l*phi)
+where phi is the polar angle:
 x=r cos(theta)cos(phi), 
 y=r cos(theta)sin(phi)
 This is determined in file Modules/ylmr2.f90 
 that calculates spherical harmonics.
- for l=0:
+for l=0:
   1 s     (m=0)
- for l=1:
+for l=1:
   1 pz     (m=0)
   2 px     (real combination of m=+/-1 with cosine)
   3 py     (real combination of m=+/-1 with sine)
- for l=2:
+for l=2:
   1 dz2    (m=0)
   2 dzx    (real combination of m=+/-1 with cosine)
   3 dzy    (real combination of m=+/-1 with sine)
   4 dx2-y2 (real combination of m=+/-2 with cosine)
   5 dxy    (real combination of m=+/-2 with sine)
 """
- """
+
+"""
 Bond type
- = sigma bonds =
- for l=0 & l=0:
+= sigma bonds =
+for l=0 & l=0:
   1 s-s 
- for l=0 & l=1:
+for l=0 & l=1:
   1 s-pz
- for l=1 & l=1:
+for l=1 & l=1:
   1 pz-pz
- for l=1 & l=2:
+for l=1 & l=2:
   1 pz-dz^2
- for l=2 & l=2:
+for l=2 & l=2:
   1 dz^2-dz^2
   2 d(x^2-y^2) - d(x^2-y^2)
   
@@ -48,8 +49,12 @@ for hybrids:
   7 sp2-sp2
   8 sp2-sp3
   9 sp3-sp3
- """
- orbital_type = {
+"""
+
+global state_weight_cutoff
+state_weight_cutoff = .05 # 5%
+
+orbital_type = {
   (0,1):"s",
   (1,1):"px",
   (1,2):"py",
@@ -60,8 +65,12 @@ for hybrids:
   (2,4):"dx2-y2",
   (2,5):"dxy"
   } 
- file = "IrCsC8.proj.out"
- def saveState():
+
+
+file = "IrCsC8.proj.out"
+
+
+def saveState():
   a = ln.replace("psi =","+").split("+")
   for i in range(1,len(a)-1):
     b = a[i].split("*")
@@ -70,11 +79,21 @@ for hybrids:
     state_orbital_type = states_dict["orbital type"][state_id]
     state_atom_type = states_dict["atom type"][state_id]
     state_atom_id = states_dict["atom id"][state_id]
-    print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
-    psi_dict[(kx,ky,kz,band_id)].append([state_weight,state_id])
- with open(file, "r") as f:
+    if state_weight>state_weight_cutoff:
+      print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
+      psi_dict[(kx,ky,kz,band_id)]["state weights"].append(state_weight)
+      psi_dict[(kx,ky,kz,band_id)]["state ids"].append(state_id)
+      psi_dict[(kx,ky,kz,band_id)]["state types"].append(state_orbital_type)
+    else:
+      psi_dict[(kx,ky,kz,band_id)]["deleted states"] += 1
+      # print("*")
+
+
+
+with open(file, "r") as f:
   lines = f.readlines()
-   states_dict = {"state":[],"atom id":[],"atom type":[],"wfc id":[],"l":[],"m":[],"orbital type":[]}
+
+  states_dict = {"state":[],"atom id":[],"atom type":[],"wfc id":[],"l":[],"m":[],"orbital type":[]}
   k_dict = {"kx":[],"ky":[],"kz":[],"psi":[],"band energy":[]}
   psi_dict = {}
   psi_tmp = []
@@ -98,28 +117,70 @@ for hybrids:
       print("state:",state,"atom id:",atom_no,"atom type:",atom_type,"wfc id:",wfc_no,"l:",l,"m:",m,"orbital type:",orbital_type[(l,m)])
     
     
-    # if psi_save:
-    #   print("SAVE {}".format(band_id),ln_idx)
-    if ("psi =" in ln and ln_idx<255):
-      print(10*"=","START",10*"=")
-      psi_save = True
-      saveState()
-     if "|psi|^2 =" in ln:
-      print(10*"=","END",10*"=")
+    if "|psi|^2 =" in ln:
       psi_save = False
-    if psi_save:
-      print(10*"=","CONTINUE",10*"=")
+      # print(10*".","end",10*".") # DEBUG
+      print(30*".") # DEBUG
+      # print("TEST:",kx,ky,kz,band_id)
+      # print("BOND TYPE:",psi_dict[(kx,ky,kz,band_id)]["bond type"])
+      print("deleted states (cutoff={}%):".format(state_weight_cutoff*100),psi_dict[(kx,ky,kz,band_id)]["deleted states"])
+
+      bond_type = ""
+      state_types = psi_dict[(kx,ky,kz,band_id)]["state types"]
+      state_weights = psi_dict[(kx,ky,kz,band_id)]["state weights"]
+      state_weights = [item/min(state_weights) for item in state_weights]
+
+      reduced_bond_type = {
+      "s":0,
+      "px":0,
+      "py":0,
+      "pz":0,
+      "dz2":0,
+      "dzx":0,
+      "dzy":0,
+      "dx2-y2":0,
+      "dxy":0
+      } 
+
+      # def vrstu veze, sumira dorpinose po tipu orbitale, odredi najmanju popunjenost
+      min_sw = 10E999
+      for st,sw in zip(state_types,state_weights):
+        bond_type += "{}({:.2f})".format(st,round(sw,2))
+        reduced_bond_type[st] += sw
+        if sw<min_sw and sw:
+          min_sw = sw
+
+      
+      psi_dict[(kx,ky,kz,band_id)]["bond type"] = bond_type 
+      print("full bond type:",bond_type)
+
+      # # odredi najmanju popunjenost
+      # min_sw = 10E999
+      # for st,sw in reduced_bond_type.items():
+      #     if sw<min_sw and sw:
+      #       min_sw = sw
+      
+      # normalizacija popunjenosti
+      reduced_bond_type = {st: sw/min_sw if sw!=0 else sw for st, sw in reduced_bond_type.items()}
+      print("reduced bond type:","".join(["{}({:.2f})".format(st,round(sw,2)) if sw is not 0 else "" for st,sw in reduced_bond_type.items()]))
+
+    elif psi_save:
+      # print(10*".","continue",10*".") # DEBUG
       saveState()
-     
+
+    
     if "==== e(" in ln:
       ln2 = ln.split()
       band_id = int(ln2[2].replace(")","")) # -1 dodati eventualno
       band_en = float(ln2[4])
       # print("band id:",band_id,"band energy:",band_en)
       print(10*"=","BAND #{} E= {}".format(band_id,band_en),10*"=")
-       psi_save = True
-       # intialize psi dictionary
-      psi_dict[(kx,ky,kz,band_id)] = []
+
+      # intialize wafefunction save
+      psi_save = True
+
+      # intialize psi dictionary
+      psi_dict[(kx,ky,kz,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":""}
     
     if "k =" in ln:
       kx,ky,kz = ln.split()[2:5]
@@ -131,5 +192,9 @@ for hybrids:
       print("kx:",kx,"ky:",ky,"kz:",kz)
       print(40*"-")
 # print(psi_dict.keys())
- # print(psi_dict[(0,0,0,1)])
- print("WARNING: Ispisivanje samo prvih 500 linija!")
+
+
+
+# print(psi_dict[(0,0,0,1)])
+
+print("WARNING: Ispisivanje samo prvih 500 linija!")
