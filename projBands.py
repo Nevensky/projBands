@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-import pandas as pd
+
 """
 Orbital Order
  Order of m-components for each l in the output:
