@@ -1,0 +1,256 @@
+
+     Program PWSCF v.6.3 starts on  1Nov2018 at 19:59:31 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI & OpenMP), running on       8 processor cores
+     Number of MPI processes:                 4
+     Threads/MPI process:                     2
+
+     MPI processes distributed on     1 nodes
+     R & G space division:  proc/nbgrp/npool/nimage =       4
+     Reading input from IrCsC8.nsc.in
+
+     Current dimensions of program PWSCF are:
+     Max number of different atomic species (ntypx) = 10
+     Max number of k-points (npk) =  40000
+     Max angular momentum in pseudopotentials (lmaxx) =  3
+
+     Atomic positions and unit cell read from directory:
+     ./tmp/CsC8_Ir111_9x9x1.save/
+ 
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation      = VDW-DF-CX ( 1  4 27  0 1 0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+               file Ir.pbe-n-rrkjus_psl.0.2.3.UPF: wavefunction(s)  5D renormalized
+
+     Subspace diagonalization in iterative solution of the eigenvalue problem:
+     a serial algorithm will be used
+
+ 
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         598     297     83               143504    50685    7598
+     Max         600     298     85               143510    50702    7613
+     Sum        2395    1189    337               574027   202767   30423
+ 
+
+
+     bravais-lattice index     =            4
+     lattice parameter (alat)  =       9.3020  a.u.
+     unit-cell volume          =    4248.1912 (a.u.)^3
+     number of atoms/cell      =           24
+     number of atomic types    =            3
+     number of electrons       =       176.00
+     number of Kohn-Sham states=          300
+     kinetic-energy cutoff     =      50.0000  Ry
+     charge density cutoff     =     400.0000  Ry
+     Exchange-correlation      = VDW-DF-CX ( 1  4 27  0 1 0)
+
+     celldm(1)=   9.302007  celldm(2)=   0.000000  celldm(3)=   6.094576
+     celldm(4)=   0.000000  celldm(5)=   0.000000  celldm(6)=   0.000000
+
+     crystal axes: (cart. coord. in units of alat)
+               a(1) = (   1.000000   0.000000   0.000000 )  
+               a(2) = (  -0.500000   0.866025   0.000000 )  
+               a(3) = (   0.000000   0.000000   6.094576 )  
+
+     reciprocal axes: (cart. coord. in units 2 pi/alat)
+               b(1) = (  1.000000  0.577350  0.000000 )  
+               b(2) = (  0.000000  1.154701  0.000000 )  
+               b(3) = (  0.000000  0.000000  0.164080 )  
+
+
+     PseudoPot. # 1 for C  read from file:
+     ../PSEUDO/C.pbe-hgh.UPF
+     MD5 check sum: 0e67d267521f6aebc6a2c9accb749a71
+     Pseudo is Norm-conserving, Zval =  4.0
+     Generated in analytical, separable form
+     Using radial grid of 1073 points,  1 beta functions with: 
+                l(1) =   0
+
+     PseudoPot. # 2 for Cs read from file:
+     ../PSEUDO/Cs.pbe-sp-hgh.UPF
+     MD5 check sum: c2b3401c83551b801504dd4c165d9032
+     Pseudo is Norm-conserving, Zval =  9.0
+     Generated in analytical, separable form
+     Using radial grid of 1251 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   3
+
+     PseudoPot. # 3 for Ir read from file:
+     ../PSEUDO/Ir.pbe-n-rrkjus_psl.0.2.3.UPF
+     MD5 check sum: c88bd550334906a664615218667a94b4
+     Pseudo is Ultrasoft + core correction, Zval =  9.0
+     Generated using "atomic" code by A. Dal Corso v.5.0.2 svn rev. 9415
+     Using radial grid of 1277 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     vdW kernel table read from file vdW_kernel_table
+     MD5 check sum: 0dc14f1bca13a5dfb50867197d55ede9
+
+     atomic species   valence    mass     pseudopotential
+        C              4.00    12.01070     C ( 1.00)
+        Cs             9.00   132.90500     Cs( 1.00)
+        Ir             9.00   192.21700     Ir( 1.00)
+
+      6 Sym. Ops. (no inversion) found
+
+
+
+   Cartesian axes
+
+     site n.     atom                  positions (alat units)
+         1           C   tau(   1) = (   0.4999996   0.5772883   1.5970957  )
+         2           C   tau(   2) = (   0.2500531   0.1443682   1.5970957  )
+         3           C   tau(   3) = (  -0.2499473   0.7216566   1.5970957  )
+         4           C   tau(   4) = (   0.4999996   0.2886749   1.5983350  )
+         5           C   tau(   5) = (   0.7499462   0.1443682   1.5970957  )
+         6           C   tau(   6) = (  -0.0000007   0.5773498   1.5983350  )
+         7           C   tau(   7) = (  -0.0000008   0.2887364   1.5970957  )
+         8           C   tau(   8) = (   0.2499458   0.7216565   1.5970957  )
+         9           Cs  tau(   9) = (   0.0000000   0.0000000   2.2419974  )
+        10           Ir  tau(  10) = (   0.3161750   0.5476311   2.8456744  )
+        11           Ir  tau(  11) = (   0.3676494   0.0000000   2.8456744  )
+        12           Ir  tau(  12) = (  -0.1838254   0.3183937   2.8456744  )
+        13           Ir  tau(  13) = (   0.0000000   0.0000000   3.2707992  )
+        14           Ir  tau(  14) = (   0.4999996   0.2886749   3.2842789  )
+        15           Ir  tau(  15) = (  -0.0000007   0.5773498   3.2842789  )
+        16           Ir  tau(  16) = (   0.1667765   0.2888654   3.7215007  )
+        17           Ir  tau(  17) = (  -0.3332239   0.5771594   3.7215007  )
+        18           Ir  tau(  18) = (   0.6664463   0.0000000   3.7215007  )
+        19           Ir  tau(  19) = (   0.3328998   0.5765994   4.1626649  )
+        20           Ir  tau(  20) = (   0.3341997   0.0000000   4.1626649  )
+        21           Ir  tau(  21) = (  -0.1671006   0.2894254   4.1626649  )
+        22           Ir  tau(  22) = (   0.0000000   0.0000000   4.5924584  )
+        23           Ir  tau(  23) = (   0.4999996   0.2886749   4.5927260  )
+        24           Ir  tau(  24) = (  -0.0000007   0.5773498   4.5927260  )
+
+     number of k points=   243  Methfessel-Paxton smearing, width (Ry)=  0.0050
+
+     Number of k-points >= 100: set verbosity='high' to print them.
+
+     Dense  grid:   574027 G-vectors     FFT dimensions: (  60,  60, 375)
+
+     Smooth grid:   202767 G-vectors     FFT dimensions: (  45,  45, 256)
+
+     Estimated max dynamical RAM per process >     585.38 MB
+
+     Estimated total dynamical RAM >       2.29 GB
+
+     The potential is recalculated from file :
+     ./tmp/CsC8_Ir111_9x9x1.save/charge-density.dat
+
+
+     negative rho (up, down):  3.560E-04 0.000E+00
+
+
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     %                                                                      %
+     % You are using vdW-DF, which was implemented by the Thonhauser group. %
+     % Please cite the following two papers that made this development      %
+     % possible and the two reviews that describe the various versions:     %
+     %                                                                      %
+     %   T. Thonhauser et al., PRL 115, 136402 (2015).                      %
+     %   T. Thonhauser et al., PRB 76, 125112 (2007).                       %
+     %   K. Berland et al., Rep. Prog. Phys. 78, 066501 (2015).             %
+     %   D.C. Langreth et al., J. Phys.: Condens. Matter 21, 084203 (2009). %
+     %                                                                      %
+     %                                                                      %
+     % If you are calculating the stress with vdW-DF, please also cite:     %
+     %                                                                      %
+     %   R. Sabatini et al., J. Phys.: Condens. Matter 24, 424209 (2012).   %
+     %                                                                      %
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+     Starting wfcs are  180 randomized atomic wfcs +  120 random wfcs
+
+     Band Structure Calculation
+     Davidson diagonalization with overlap
+
+     ethr =  5.68E-11,  avg # of iterations = 23.2
+
+     total cpu time spent up to now is    13252.9 secs
+
+     End of band structure calculation
+
+     Number of k-points >= 100: set verbosity='high' to print the bands.
+
+     the Fermi energy is     5.6971 ev
+
+     Writing output data file CsC8_Ir111_9x9x1.save/
+ 
+     init_run     :      5.77s CPU      3.29s WALL (       1 calls)
+     electrons    :  26223.71s CPU  13248.99s WALL (       1 calls)
+
+     Called by init_run:
+     wfcinit      :      0.00s CPU      0.00s WALL (       1 calls)
+     potinit      :      3.69s CPU      1.96s WALL (       1 calls)
+     hinit0       :      0.96s CPU      0.62s WALL (       1 calls)
+
+     Called by electrons:
+     c_bands      :  26223.56s CPU  13248.91s WALL (       1 calls)
+     v_of_rho     :      3.52s CPU      1.87s WALL (       1 calls)
+     newd         :      0.99s CPU      0.57s WALL (       1 calls)
+
+     Called by c_bands:
+     init_us_2    :      5.16s CPU      3.01s WALL (     243 calls)
+     cegterg      :  25097.96s CPU  12679.58s WALL (     473 calls)
+
+     Called by sum_band:
+
+     Called by *egterg:
+     h_psi        :  13672.52s CPU   6880.51s WALL (    6349 calls)
+     s_psi        :    620.58s CPU    311.68s WALL (    6349 calls)
+     g_psi        :     36.78s CPU     20.74s WALL (    5633 calls)
+     cdiaghg      :   4318.32s CPU   2244.08s WALL (    5876 calls)
+
+     Called by h_psi:
+     h_psi:pot    :  13567.33s CPU   6826.82s WALL (    6349 calls)
+     h_psi:calbec :    657.19s CPU    328.78s WALL (    6349 calls)
+     vloc_psi     :  12292.56s CPU   6184.27s WALL (    6349 calls)
+     add_vuspsi   :    617.11s CPU    313.73s WALL (    6349 calls)
+
+     General routines
+     calbec       :    657.11s CPU    328.76s WALL (    6349 calls)
+     fft          :      2.47s CPU      1.26s WALL (      64 calls)
+     ffts         :      0.00s CPU      0.00s WALL (       1 calls)
+     fftw         :   9585.39s CPU   4777.39s WALL ( 2274474 calls)
+     interpolate  :      0.06s CPU      0.03s WALL (       1 calls)
+     davcio       :     52.43s CPU    105.63s WALL (     486 calls)
+ 
+     Parallel routines
+     fft_scatt_xy :   1702.24s CPU   1224.96s WALL ( 2274539 calls)
+     fft_scatt_yz :   1390.99s CPU    458.39s WALL ( 2274539 calls)
+ 
+     PWSCF        :     7h18m CPU       18h 3m WALL
+
+      45h
+ 
+   This run was terminated on:  23:45: 1   1Nov2018            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

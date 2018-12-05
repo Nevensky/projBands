@@ -1,0 +1,5 @@
+&BANDS
+  outdir='./tmp'
+  prefix='CsC8_Ir111_9x9x1'  
+  filband="bandsplot.dat"
+/

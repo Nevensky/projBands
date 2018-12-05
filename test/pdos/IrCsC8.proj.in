@@ -1,0 +1,9 @@
+&projwfc
+prefix = 'CsC8_Ir111_9x9x1'
+outdir = './tmp'
+degauss = 0.01
+DeltaE = 0.001
+Emin = -10.0
+Emax = 10.0
+/
+
