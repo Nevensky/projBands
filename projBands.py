@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 import numpy as np
 
-"""
-Orbital Order
+"""Orbital Order
  Order of m-components for each l in the output:
     1, cos(phi), sin(phi), cos(2*phi), sin(2*phi), .., cos(l*phi), sin(l*phi)
 where phi is the polar angle:
-x=r cos(theta)cos(phi), 
+x=r cos(theta)cos(phi),
 y=r cos(theta)sin(phi)
-This is determined in file Modules/ylmr2.f90 
+This is determined in file Modules/ylmr2.f90
 that calculates spherical harmonics.
 for l=0:
   1 s     (m=0)
@@ -28,7 +27,7 @@ for l=2:
 Bond type
 = sigma bonds =
 for l=0 & l=0:
-  1 s-s 
+  1 s-s
 for l=0 & l=1:
   1 s-pz
 for l=1 & l=1:
@@ -38,7 +37,7 @@ for l=1 & l=2:
 for l=2 & l=2:
   1 dz^2-dz^2
   2 d(x^2-y^2) - d(x^2-y^2)
-  
+
 for hybrids:
   1 s-sp
   2 s-sp2
@@ -48,10 +47,8 @@ for hybrids:
   6 sp-sp3
   7 sp2-sp2
   8 sp2-sp3
-  9 sp3-sp3
-"""
+  9 sp3-sp3"""
 
-global state_weight_cutoff
 state_weight_cutoff = .05 # 5%
 
 orbital_type = {
@@ -64,7 +61,7 @@ orbital_type = {
   (2,3):"dzy",
   (2,4):"dx2-y2",
   (2,5):"dxy"
-  } 
+  }
 
 
 file = "IrCsC8.proj.out"
@@ -115,8 +112,8 @@ with open(file, "r") as f:
       states_dict["m"].append(m)
       states_dict["orbital type"].append(orbital_type[(l,m)])
       print("state:",state,"atom id:",atom_no,"atom type:",atom_type,"wfc id:",wfc_no,"l:",l,"m:",m,"orbital type:",orbital_type[(l,m)])
-    
-    
+
+
     if "|psi|^2 =" in ln:
       psi_save = False
       # print(10*".","end",10*".") # DEBUG
@@ -140,7 +137,7 @@ with open(file, "r") as f:
       "dzy":0,
       "dx2-y2":0,
       "dxy":0
-      } 
+      }
 
       # def vrstu veze, sumira dorpinose po tipu orbitale, odredi najmanju popunjenost
       min_sw = 10E999
@@ -150,8 +147,8 @@ with open(file, "r") as f:
         if sw<min_sw and sw:
           min_sw = sw
 
-      
-      psi_dict[(kx,ky,kz,band_id)]["bond type"] = bond_type 
+
+      psi_dict[(kx,ky,kz,band_id)]["bond type"] = bond_type
       print("full bond type:",bond_type)
 
       # # odredi najmanju popunjenost
@@ -159,7 +156,7 @@ with open(file, "r") as f:
       # for st,sw in reduced_bond_type.items():
       #     if sw<min_sw and sw:
       #       min_sw = sw
-      
+
       # normalizacija popunjenosti
       reduced_bond_type = {st: sw/min_sw if sw!=0 else sw for st, sw in reduced_bond_type.items()}
       print("reduced bond type:","".join(["{}({:.2f})".format(st,round(sw,2)) if sw is not 0 else "" for st,sw in reduced_bond_type.items()]))
@@ -168,7 +165,7 @@ with open(file, "r") as f:
       # print(10*".","continue",10*".") # DEBUG
       saveState()
 
-    
+
     if "==== e(" in ln:
       ln2 = ln.split()
       band_id = int(ln2[2].replace(")","")) # -1 dodati eventualno
@@ -181,7 +178,7 @@ with open(file, "r") as f:
 
       # intialize psi dictionary
       psi_dict[(kx,ky,kz,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":""}
-    
+
     if "k =" in ln:
       kx,ky,kz = ln.split()[2:5]
       kx, ky, kz = float(kx),float(ky), float(kz)
