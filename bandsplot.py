@@ -6,9 +6,12 @@ plt.style.use("seaborn-muted")
 
 def main():
 	""" Initalize BandPlot() objects. """
-	graphene = BandPlot("graphene/bandsplot.dat.gnu",-2.3190)
-	CsC8 = BandPlot("CsC8/bandsplot.dat.gnu",-0.6767)
-	CsC8_Ir111 = BandPlot("CsC8_Ir111/bandsplot.dat.gnu",5.6936)
+	#graphene
+	BandPlot("graphene/bandsplot.dat.gnu",-2.3190)
+	#CsC8
+	BandPlot("CsC8/bandsplot.dat.gnu",-0.6767)
+	#CsC8_Ir111
+	BandPlot("CsC8_Ir111/bandsplot.dat.gnu",5.6936)
 
 class BandPlot():
 	def __init__(self,fname,fermi_en,e_min=-5,e_max=5):
@@ -27,13 +30,13 @@ class BandPlot():
 		self.bands_out = os.path.dirname(self.fname)+"/bands"
 		if not os.path.exists(self.bands_out):
 			os.makedirs(self.bands_out)
-	
+
 	def readBands(self):
-		"""Imports all bands bands from GNU file 
+		"""Imports all bands bands from GNU file
 		(output: plotband.x) into a single array.
 		Extracts the number of kpoints and bands."""
 		self.bands = np.loadtxt(self.fname)
-		self.nkpoints = np.unique(self.bands[:,0]).shape[0]	
+		self.nkpoints = np.unique(self.bands[:,0]).shape[0]
 		self.nbands = int(self.bands.shape[0]/self.nkpoints)
 		return self.bands
 
@@ -53,7 +56,7 @@ class BandPlot():
 			data[:,1] -= self.fermi_en
 			self.bandsClean[band_i,:,:] = data
 			start_idx = end_idx
-			end_idx += self.nkpoints	
+			end_idx += self.nkpoints
 		return self.bandsClean
 
 	def plotBands(self,save=True):
