@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+import sys
 
 """Orbital Order
  Order of m-components for each l in the output:
@@ -53,9 +54,9 @@ state_weight_cutoff = .05 # 5%
 
 orbital_type = {
   (0,1):"s",
-  (1,1):"px",
-  (1,2):"py",
-  (1,3):"pz",
+  (1,1):"pz",
+  (1,2):"px",
+  (1,3):"py",
   (2,1):"dz2",
   (2,2):"dzx",
   (2,3):"dzy",
@@ -64,7 +65,8 @@ orbital_type = {
   }
 
 
-file = "IrCsC8.proj.out"
+file = sys.argv[1]
+# file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
 
 
 def saveState():
@@ -193,5 +195,4 @@ with open(file, "r") as f:
 
 
 # print(psi_dict[(0,0,0,1)])
-
-print("WARNING: Ispisivanje samo prvih 500 linija!")
+# print("WARNING: Ispisivanje samo prvih 500 linija!")
