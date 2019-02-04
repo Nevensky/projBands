@@ -5,7 +5,7 @@ import glob
 plt.style.use("ggplot")
 
 
-files = glob.glob("pdos/*pdos_atm#*")
+files = glob.glob("/Users/nevensky/Desktop/vito/CsC8/*pdos_atm*")
 # print(files)
 
 fig, axs = plt.subplots(1, 3)

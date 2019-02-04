@@ -7,11 +7,11 @@ plt.style.use("seaborn-muted")
 def main():
 	""" Initalize BandPlot() objects. """
 	#graphene
-	BandPlot("graphene/bandsplot.dat.gnu",-2.3190)
+	BandPlot("/Users/Nevensky/Desktop/vito/graphene/bandsplot.dat.gnu",-2.3190)
 	#CsC8
-	BandPlot("CsC8/bandsplot.dat.gnu",-0.6767)
+	BandPlot("/Users/Nevensky/Desktop/vito/CsC8/bandsplot.dat.gnu",-0.6767)
 	#CsC8_Ir111
-	BandPlot("CsC8_Ir111/bandsplot.dat.gnu",5.6936)
+	BandPlot("/Users/Nevensky/Desktop/vito/CsC8_Ir111/bandsplot.dat.gnu",5.6936)
 
 class BandPlot():
 	def __init__(self,fname,fermi_en,e_min=-5,e_max=5):
@@ -29,7 +29,7 @@ class BandPlot():
 		"""Create dirrectory for storing separated bands."""
 		self.bands_out = os.path.dirname(self.fname)+"/bands"
 		if not os.path.exists(self.bands_out):
-			os.makedirs(self.bands_out)
+			os.mkdir(self.bands_out)
 
 	def readBands(self):
 		"""Imports all bands bands from GNU file
