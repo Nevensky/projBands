@@ -65,8 +65,8 @@ orbital_type = {
   }
 
 
-file = sys.argv[1]
-# file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
+# file = sys.argv[1]
+file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
 
 
 def saveState():
@@ -79,10 +79,12 @@ def saveState():
     state_atom_type = states_dict["atom type"][state_id]
     state_atom_id = states_dict["atom id"][state_id]
     if state_weight>state_weight_cutoff:
-      print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
+      # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
       psi_dict[(kx,ky,kz,band_id)]["state weights"].append(state_weight)
       psi_dict[(kx,ky,kz,band_id)]["state ids"].append(state_id)
       psi_dict[(kx,ky,kz,band_id)]["state types"].append(state_orbital_type)
+
+      psi_dict[(kx,ky,kz,band_id)]["atoms"].append([state_atom_id,state_atom_type])
     else:
       psi_dict[(kx,ky,kz,band_id)]["deleted states"] += 1
       # print("*")
@@ -95,8 +97,9 @@ with open(file, "r") as f:
   states_dict = {"state":[],"atom id":[],"atom type":[],"wfc id":[],"l":[],"m":[],"orbital type":[]}
   k_dict = {"kx":[],"ky":[],"kz":[],"psi":[],"band energy":[]}
   psi_dict = {}
+  bands = []
   psi_tmp = []
-  psi_save = False
+  line_contains_psi_states = False
   for ln_idx,ln in enumerate(lines):
     if "state #" in ln:
       ln2 = ln.split()
@@ -113,11 +116,13 @@ with open(file, "r") as f:
       states_dict["l"].append(l)
       states_dict["m"].append(m)
       states_dict["orbital type"].append(orbital_type[(l,m)])
+
+      print("=== ATOMIC WAVEFUNCTIONS===")
       print("state:",state,"atom id:",atom_no,"atom type:",atom_type,"wfc id:",wfc_no,"l:",l,"m:",m,"orbital type:",orbital_type[(l,m)])
 
 
     if "|psi|^2 =" in ln:
-      psi_save = False
+      line_contains_psi_states = False
       # print(10*".","end",10*".") # DEBUG
       print(30*".") # DEBUG
       # print("TEST:",kx,ky,kz,band_id)
@@ -127,7 +132,16 @@ with open(file, "r") as f:
       bond_type = ""
       state_types = psi_dict[(kx,ky,kz,band_id)]["state types"]
       state_weights = psi_dict[(kx,ky,kz,band_id)]["state weights"]
+
+      # percentage of the density covered by the projected states after applying the cutoff
+      psiSq_old = float(ln.strip().split()[-1])
+      psiSq_new = np.sum(state_weights)
+      psi_dict[(kx,ky,kz,band_id)]["|psi^2|"] = np.sum(state_weights)
+      print("old |psi^2| {}\t new |psi^2| {}".format(psiSq_old,psiSq_new))
+
+      # turn state weights into occupancy 2.0
       state_weights = [item/min(state_weights) for item in state_weights]
+
 
       reduced_bond_type = {
       "s":0,
@@ -163,7 +177,7 @@ with open(file, "r") as f:
       reduced_bond_type = {st: sw/min_sw if sw!=0 else sw for st, sw in reduced_bond_type.items()}
       print("reduced bond type:","".join(["{}({:.2f})".format(st,round(sw,2)) if sw is not 0 else "" for st,sw in reduced_bond_type.items()]))
 
-    elif psi_save:
+    elif line_contains_psi_states:
       # print(10*".","continue",10*".") # DEBUG
       saveState()
 
@@ -176,10 +190,13 @@ with open(file, "r") as f:
       print(10*"=","BAND #{} E= {}".format(band_id,band_en),10*"=")
 
       # intialize wafefunction save
-      psi_save = True
+      line_contains_psi_states = True
 
       # intialize psi dictionary
-      psi_dict[(kx,ky,kz,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":""}
+      psi_dict[(kx,ky,kz,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":"","band":[], "atoms":[],"|psi^2|":None}
+
+      # save band id and energy
+      psi_dict[(kx,ky,kz,band_id)]["band"] = [band_id,band_en]
 
     if "k =" in ln:
       kx,ky,kz = ln.split()[2:5]
@@ -196,3 +213,11 @@ with open(file, "r") as f:
 
 # print(psi_dict[(0,0,0,1)])
 # print("WARNING: Ispisivanje samo prvih 500 linija!")
+
+psi_dict_keys = [*psi_dict]
+for key in psi_dict_keys:
+  psiSq = np.sum( psi_dict[key]["state weights"])
+  psi_dict[key]["|psi^2|"] = psiSq
+  if psi_dict[key]["|psi^2|"] >0 :
+    print(psi_dict[key]["band"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
+  # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
