@@ -95,7 +95,7 @@ with open(file, "r") as f:
   lines = f.readlines()
 
   states_dict = {"state":[],"atom id":[],"atom type":[],"wfc id":[],"l":[],"m":[],"orbital type":[]}
-  k_dict = {"kx":[],"ky":[],"kz":[],"psi":[],"band energy":[]}
+  k_dict = {"kx":[],"ky":[],"kz":[],"psi":[],"band energy":[],"k-dist":[]}
   psi_dict = {}
   bands = []
   psi_tmp = []
@@ -201,11 +201,13 @@ with open(file, "r") as f:
     if "k =" in ln:
       kx,ky,kz = ln.split()[2:5]
       kx, ky, kz = float(kx),float(ky), float(kz)
+      k_dist = np.linalg.norm([kx,ky,kz])
       k_dict["kx"].append(kx)
       k_dict["ky"].append(ky)
       k_dict["kz"].append(kz)
+      k_dict["k-dist"].append(k_dist)
       print(40*"-")
-      print("kx:",kx,"ky:",ky,"kz:",kz)
+      print("kx:",kx,"ky:",ky,"kz:",kz,"k-dist:",k_dist)
       print(40*"-")
 # print(psi_dict.keys())
 
