@@ -2,7 +2,7 @@
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
-plt.style.use("ggplot")
+# plt.style.use("ggplot")
 
 """Orbital Order
  Order of m-components for each l in the output:
@@ -69,6 +69,18 @@ orbital_type = {
 
 # file = sys.argv[1]
 file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
+
+
+
+nkpoints = 150
+# graphene
+nbands = 15
+nwfcs = 8
+# CsC8
+# nbands = 100
+# nwfcs = 45
+ncontribs = 4 # sigma, pi, d, other
 
 
 def saveState():
@@ -93,15 +105,12 @@ def saveState():
 
 
 
-nkpoints = 150
-nbands = 15
-nwfcs = 8
-ncontibs = 4 # sigma, pi, d, other
-
 
 # band_id , k_i, x(k distance)_k_i, y(energy)_k_i, contrib_k_i
 # data = np.zeros([nbands,nkpoints,2])
-data = np.zeros([nbands,nkpoints,2,ncontibs])
+# data = np.zeros([nbands,nkpoints,2,ncontribs])
+data = np.zeros([nbands,nkpoints,3,ncontribs])
+
 
 k_id = -1 # if k_id stays -1, no k-points were found in projwfc output
 with open(file, "r") as f:
@@ -153,6 +162,33 @@ with open(file, "r") as f:
       psi_dict[(k_dist,band_id)]["|psi^2|"] = np.sum(state_weights)
       print("old |psi^2| {}\t new |psi^2| {}".format(psiSq_old,psiSq_new))
 
+
+      # calculate orbital projected bond type
+      contribs = np.zeros(4) # sigma pi d unknown
+      for st,sw in zip(state_types,state_weights):
+        if st=="s":
+          contribs[0] += sw
+        elif (st=="px" or st=="py"):
+          contribs[0] += sw
+        elif st=="pz":
+          contribs[1] += sw
+        elif "d" in st:
+          contribs[2] += sw
+      contribs[3] = 1 - np.sum(contribs)
+      print(contribs)
+      # fill data array
+
+
+      for idx, contrib_i in enumerate(contribs):
+        try:
+          data[band_id,k_id,0,idx] = k_dist
+          data[band_id,k_id,1,idx] = band_en
+          if psiSq_new>.80:
+            data[band_id,k_id,2,idx] = contrib_i
+        except IndexError:
+          pass
+  
+
       # turn state weights into occupancy 2.0
       state_weights = [item/min(state_weights) for item in state_weights]
 
@@ -190,11 +226,6 @@ with open(file, "r") as f:
       # normalizacija popunjenosti
       reduced_bond_type = {st: sw/min_sw if sw!=0 else sw for st, sw in reduced_bond_type.items()}
       print("reduced bond type:","".join(["{}({:.2f})".format(st,round(sw,2)) if sw is not 0 else "" for st,sw in reduced_bond_type.items()]))
-
-
-      # fill data array
-      data[band_id,k_id,0,0] = k_dist
-      data[band_id,k_id,1,0] = band_en
 
 
     elif line_contains_psi_states:
@@ -252,17 +283,21 @@ for key in psi_dict_keys:
   # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
 
 
-print(data)
+# print(data)
 
 #band_id = len
-for band_idx in range(5): 
-
+for band_idx in range(band_id): 
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
-  for k_idx in range(nkpoints):
+  
+  # for k_idx in range(nkpoints):
     #SIGMA
-    plt.plot(data[band_idx,k_idx,0,0],data[band_idx,k_idx,1,0],".",markersize=np.random.randn()*12,color="wheat")
+  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*50,c="wheat")
     #PI
-    plt.plot(data[band_idx,k_idx,0,0],data[band_idx,k_idx,1,0],".",markersize=np.random.rand()*12,color="salmon")
-
+  plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*50,c="salmon")
+    # d
+  plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*50,c="lightblue")
+    # unknown
+  plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*50,c="teal")
 plt.show()
+# plt.savefig("/Users/Nevensky/Desktop/test.pdf")
