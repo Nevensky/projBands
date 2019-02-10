@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 
 """Orbital Order
  Order of m-components for each l in the output:
@@ -79,18 +80,29 @@ def saveState():
     state_atom_type = states_dict["atom type"][state_id]
     state_atom_id = states_dict["atom id"][state_id]
     if state_weight>state_weight_cutoff:
-      # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
-      psi_dict[(kx,ky,kz,band_id)]["state weights"].append(state_weight)
-      psi_dict[(kx,ky,kz,band_id)]["state ids"].append(state_id)
-      psi_dict[(kx,ky,kz,band_id)]["state types"].append(state_orbital_type)
+      print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
+      psi_dict[(k_dist,band_id)]["state weights"].append(state_weight)
+      psi_dict[(k_dist,band_id)]["state ids"].append(state_id)
+      psi_dict[(k_dist,band_id)]["state types"].append(state_orbital_type)
 
-      psi_dict[(kx,ky,kz,band_id)]["atoms"].append([state_atom_id,state_atom_type])
+      psi_dict[(k_dist,band_id)]["atoms"].append([state_atom_id,state_atom_type])
     else:
-      psi_dict[(kx,ky,kz,band_id)]["deleted states"] += 1
+      psi_dict[(k_dist,band_id)]["deleted states"] += 1
       # print("*")
 
 
 
+nkpoints = 150
+nbands = 15
+nwfcs = 8
+ncontibs = 4 # sigma, pi, d, other
+
+
+# band_id , k_i, band_en(k_i) contrib_k_i --> k_i = i-th k-path distance
+# data = np.zeros([nbands,nkpoints,nkpoints,4])
+data = np.zeros([nbands,nkpoints,2])
+
+k_id = -1
 with open(file, "r") as f:
   lines = f.readlines()
 
@@ -100,6 +112,8 @@ with open(file, "r") as f:
   bands = []
   psi_tmp = []
   line_contains_psi_states = False
+
+  print("=== ATOMIC WAVEFUNCTIONS===")
   for ln_idx,ln in enumerate(lines):
     if "state #" in ln:
       ln2 = ln.split()
@@ -117,7 +131,6 @@ with open(file, "r") as f:
       states_dict["m"].append(m)
       states_dict["orbital type"].append(orbital_type[(l,m)])
 
-      print("=== ATOMIC WAVEFUNCTIONS===")
       print("state:",state,"atom id:",atom_no,"atom type:",atom_type,"wfc id:",wfc_no,"l:",l,"m:",m,"orbital type:",orbital_type[(l,m)])
 
 
@@ -125,18 +138,18 @@ with open(file, "r") as f:
       line_contains_psi_states = False
       # print(10*".","end",10*".") # DEBUG
       print(30*".") # DEBUG
-      # print("TEST:",kx,ky,kz,band_id)
-      # print("BOND TYPE:",psi_dict[(kx,ky,kz,band_id)]["bond type"])
-      print("deleted states (cutoff={}%):".format(state_weight_cutoff*100),psi_dict[(kx,ky,kz,band_id)]["deleted states"])
+      # print("TEST:",k_dist,band_id)
+      # print("BOND TYPE:",psi_dict[(k_dist,band_id)]["bond type"])
+      print("deleted states (cutoff={}%):".format(state_weight_cutoff*100),psi_dict[(k_dist,band_id)]["deleted states"])
 
       bond_type = ""
-      state_types = psi_dict[(kx,ky,kz,band_id)]["state types"]
-      state_weights = psi_dict[(kx,ky,kz,band_id)]["state weights"]
+      state_types = psi_dict[(k_dist,band_id)]["state types"]
+      state_weights = psi_dict[(k_dist,band_id)]["state weights"]
 
       # percentage of the density covered by the projected states after applying the cutoff
       psiSq_old = float(ln.strip().split()[-1])
       psiSq_new = np.sum(state_weights)
-      psi_dict[(kx,ky,kz,band_id)]["|psi^2|"] = np.sum(state_weights)
+      psi_dict[(k_dist,band_id)]["|psi^2|"] = np.sum(state_weights)
       print("old |psi^2| {}\t new |psi^2| {}".format(psiSq_old,psiSq_new))
 
       # turn state weights into occupancy 2.0
@@ -164,7 +177,7 @@ with open(file, "r") as f:
           min_sw = sw
 
 
-      psi_dict[(kx,ky,kz,band_id)]["bond type"] = bond_type
+      psi_dict[(k_dist,band_id)]["bond type"] = bond_type
       print("full bond type:",bond_type)
 
       # # odredi najmanju popunjenost
@@ -176,6 +189,15 @@ with open(file, "r") as f:
       # normalizacija popunjenosti
       reduced_bond_type = {st: sw/min_sw if sw!=0 else sw for st, sw in reduced_bond_type.items()}
       print("reduced bond type:","".join(["{}({:.2f})".format(st,round(sw,2)) if sw is not 0 else "" for st,sw in reduced_bond_type.items()]))
+
+
+      # fill data array
+      try:
+        data[band_id-1,k_id,0] = k_dist
+        data[band_id-1,k_id,1] = band_en
+      except IndexError:
+        pass
+
 
     elif line_contains_psi_states:
       # print(10*".","continue",10*".") # DEBUG
@@ -193,15 +215,20 @@ with open(file, "r") as f:
       line_contains_psi_states = True
 
       # intialize psi dictionary
-      psi_dict[(kx,ky,kz,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":"","band":[], "atoms":[],"|psi^2|":None}
+      psi_dict[(k_dist,band_id)] = {"state weights":[],"state ids":[],"state types":[],"deleted states":0,"bond type":"","band_en":None, "atoms":[],"|psi^2|":None}
 
       # save band id and energy
-      psi_dict[(kx,ky,kz,band_id)]["band"] = [band_id,band_en]
+      psi_dict[(k_dist,band_id)]["band_en"] = band_en
 
     if "k =" in ln:
+      k_id += 1 # counter
       kx,ky,kz = ln.split()[2:5]
       kx, ky, kz = float(kx),float(ky), float(kz)
-      k_dist = np.linalg.norm([kx,ky,kz])
+      if k_id == 0:
+        k_dist = 0.0
+      else:
+        k_dist = k_dict["k-dist"][k_id-1] + np.linalg.norm([k_dict["kx"][k_id-1]-kx,k_dict["ky"][k_id-1]-ky,k_dict["kz"][k_id-1]-kz])
+      # k_dict je nepotreban u ovom obliku
       k_dict["kx"].append(kx)
       k_dict["ky"].append(ky)
       k_dict["kz"].append(kz)
@@ -209,6 +236,8 @@ with open(file, "r") as f:
       print(40*"-")
       print("kx:",kx,"ky:",ky,"kz:",kz,"k-dist:",k_dist)
       print(40*"-")
+
+
 # print(psi_dict.keys())
 
 
@@ -221,5 +250,11 @@ for key in psi_dict_keys:
   psiSq = np.sum( psi_dict[key]["state weights"])
   psi_dict[key]["|psi^2|"] = psiSq
   if psi_dict[key]["|psi^2|"] >0 :
-    print(psi_dict[key]["band"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
+    print(psi_dict[key]["band_en"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
   # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
+
+print(data)
+
+for i in range(5):
+  plt.plot(data[i,:,0],data[i,:,1],".")
+plt.show()
