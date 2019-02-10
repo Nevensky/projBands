@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+plt.style.use("ggplot")
 
 """Orbital Order
  Order of m-components for each l in the output:
@@ -98,11 +99,11 @@ nwfcs = 8
 ncontibs = 4 # sigma, pi, d, other
 
 
-# band_id , k_i, band_en(k_i) contrib_k_i --> k_i = i-th k-path distance
-# data = np.zeros([nbands,nkpoints,nkpoints,4])
-data = np.zeros([nbands,nkpoints,2])
+# band_id , k_i, x(k distance)_k_i, y(energy)_k_i, contrib_k_i
+# data = np.zeros([nbands,nkpoints,2])
+data = np.zeros([nbands,nkpoints,2,ncontibs])
 
-k_id = -1
+k_id = -1 # if k_id stays -1, no k-points were found in projwfc output
 with open(file, "r") as f:
   lines = f.readlines()
 
@@ -192,11 +193,8 @@ with open(file, "r") as f:
 
 
       # fill data array
-      try:
-        data[band_id-1,k_id,0] = k_dist
-        data[band_id-1,k_id,1] = band_en
-      except IndexError:
-        pass
+      data[band_id,k_id,0,0] = k_dist
+      data[band_id,k_id,1,0] = band_en
 
 
     elif line_contains_psi_states:
@@ -206,7 +204,7 @@ with open(file, "r") as f:
 
     if "==== e(" in ln:
       ln2 = ln.split()
-      band_id = int(ln2[2].replace(")","")) # -1 dodati eventualno
+      band_id = int(ln2[2].replace(")","")) -1 # start from idx 0 instead of 1
       band_en = float(ln2[4])
       # print("band id:",band_id,"band energy:",band_en)
       print(10*"=","BAND #{} E= {}".format(band_id,band_en),10*"=")
@@ -253,8 +251,18 @@ for key in psi_dict_keys:
     print(psi_dict[key]["band_en"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
   # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
 
+
 print(data)
 
-for i in range(5):
-  plt.plot(data[i,:,0],data[i,:,1],".")
+#band_id = len
+for band_idx in range(5): 
+
+  # black bands
+  plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
+  for k_idx in range(nkpoints):
+    #SIGMA
+    plt.plot(data[band_idx,k_idx,0,0],data[band_idx,k_idx,1,0],".",markersize=np.random.randn()*12,color="wheat")
+    #PI
+    plt.plot(data[band_idx,k_idx,0,0],data[band_idx,k_idx,1,0],".",markersize=np.random.rand()*12,color="salmon")
+
 plt.show()
