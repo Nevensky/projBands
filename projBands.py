@@ -170,6 +170,7 @@ with open(file, "r") as f:
       bond_type = ""
       state_types = psi_dict[(k_dist,band_id)]["state types"]
       state_weights = psi_dict[(k_dist,band_id)]["state weights"]
+      state_atom_types = psi_dict[(k_dist,band_id)]["atoms"]
 
       # percentage of the density covered by the projected states after applying the cutoff
       psiSq_old = float(ln.strip().split()[-1])
@@ -180,23 +181,37 @@ with open(file, "r") as f:
 
       # calculate orbital projected bond type
       contribs = np.zeros(4) # sigma pi d unknown
-      for st,sw in zip(state_types,state_weights):
-        if st=="s":
-          contribs[0] += sw
-        elif (st=="px" or st=="py"):
-          contribs[0] += sw
-        elif st=="pz":
-          contribs[1] += sw
-        # elif st=="dz2":
-        #   contribs[0] += sw
-        # elif (st=="dzx" or st=="dzy"):
-        #   contribs[1] += sw
-        # elif (st=="dx2-y2" or st=="dxy"):
-        #   contribs[2] += sw
-        elif "d" in st:
-          contribs[2] += sw
-      contribs[3] = 1 - np.sum(contribs)
-      print(contribs)
+
+      if state_atom_types != []:
+        state_atom_types = np.asarray(state_atom_types)[:,1].tolist()
+
+      condition = True
+      # Cs-Cs, C-Cs
+      # condition = "Cs" in state_atom_types
+      # C-C
+      # condition = ("C" in state_atom_types and "Ir" not in state_atom_types and "Cs" not in state_atom_types)
+      # Cs-Ir, Cs-Cs
+      #condition = ((("Cs" in state_atom_types and "Ir" not in state_atom_types) or ("Ir" in state_atom_types and "Cs" in state_atom_types)) and "C" not in state_atom_types)
+      # Cs-C, Cs-Cs
+      #condition = ((("Cs" in state_atom_types and "C" not in state_atom_types) or ("C" in state_atom_types and "Cs" in state_atom_types)) and "Ir" not in state_atom_types)
+      if condition:
+        for st,sw,sa in zip(state_types,state_weights,state_atom_types):
+          if st=="s":
+            contribs[0] += sw
+          elif (st=="px" or st=="py"):
+            contribs[0] += sw
+          elif st=="pz":
+            contribs[1] += sw
+          # elif st=="dz2":
+            # contribs[0] += sw
+          # elif (st=="dzx" or st=="dzy"):
+            # contribs[1] += sw
+          # elif (st=="dx2-y2" or st=="dxy"):
+            # contribs[2] += sw
+          elif "d" in st:
+            contribs[2] += sw
+        contribs[3] = 1 - np.sum(contribs)
+        print(contribs)
       # fill data array
 
 
@@ -311,13 +326,13 @@ for band_idx in range(band_id):
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
   #SIGMA
-  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*50,c="magenta",label=r"$\sigma$",alpha=.7)
+  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*100,c="magenta",label=r"$\sigma$",alpha=.7)
    #PI
-  # plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*50,c="salmon",label=r"$\pi$",alpha=.7)
+  plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*100,c="salmon",label=r"$\pi$",alpha=.7)
   # d
-  # plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*50,c="lightblue",label=r"$d$",alpha=.7)
+  plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*100,c="lightblue",label=r"$d$",alpha=.7)
   # unknown
-  # plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*50,c="wheat")
+  # plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*100,c="wheat")
 
 # plt.legend(["bands",r"$\sigma$",r"$\pi$",r"$d$"])
 # plt.legend()
