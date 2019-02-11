@@ -52,7 +52,7 @@ for hybrids:
   8 sp2-sp3
   9 sp3-sp3"""
 
-state_weight_cutoff = .05 # 5%
+state_weight_cutoff = .02 # 2%
 
 orbital_type = {
   (0,1):"s",
@@ -68,20 +68,35 @@ orbital_type = {
 
 
 # file = sys.argv[1]
-file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
-# file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
+# file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
+file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/IrCsC8.proj.out"
 
 
+
+e_min = -4
+e_max = 4
 
 nkpoints = 150
-# graphene
-nbands = 15
-nwfcs = 8
-# CsC8
-# nbands = 100
-# nwfcs = 45
 ncontribs = 4 # sigma, pi, d, other
 
+# graphene
+# highsymm = [0.0000, 0.6778, 1.0167, 1.6038]
+# fermi_en = -2.3190
+# nbands = 15
+# nwfcs = 8
+
+#CsC8
+highsymm = [0.0000, 0.6667, 1.0000, 1.5773]
+fermi_en = -0.6767
+nbands = 100
+nwfcs = 45
+
+#CsC8 / Ir(111)
+# highsymm = [0.0000, 0.5774, 0.9107, 1.5773]
+# fermi_en = 5.6936
+# nbands = 300
+# nwfcs = 180
 
 def saveState():
   a = ln.replace("psi =","+").split("+")
@@ -172,6 +187,12 @@ with open(file, "r") as f:
           contribs[0] += sw
         elif st=="pz":
           contribs[1] += sw
+        # elif st=="dz2":
+        #   contribs[0] += sw
+        # elif (st=="dzx" or st=="dzy"):
+        #   contribs[1] += sw
+        # elif (st=="dx2-y2" or st=="dxy"):
+        #   contribs[2] += sw
         elif "d" in st:
           contribs[2] += sw
       contribs[3] = 1 - np.sum(contribs)
@@ -183,7 +204,7 @@ with open(file, "r") as f:
         try:
           data[band_id,k_id,0,idx] = k_dist
           data[band_id,k_id,1,idx] = band_en
-          if psiSq_new>.80:
+          if psiSq_new>.10:
             data[band_id,k_id,2,idx] = contrib_i
         except IndexError:
           pass
@@ -236,7 +257,7 @@ with open(file, "r") as f:
     if "==== e(" in ln:
       ln2 = ln.split()
       band_id = int(ln2[2].replace(")","")) -1 # start from idx 0 instead of 1
-      band_en = float(ln2[4])
+      band_en = float(ln2[4]) - fermi_en
       # print("band id:",band_id,"band energy:",band_en)
       print(10*"=","BAND #{} E= {}".format(band_id,band_en),10*"=")
 
@@ -278,26 +299,35 @@ psi_dict_keys = [*psi_dict]
 for key in psi_dict_keys:
   psiSq = np.sum( psi_dict[key]["state weights"])
   psi_dict[key]["|psi^2|"] = psiSq
-  if psi_dict[key]["|psi^2|"] >0 :
-    print(psi_dict[key]["band_en"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
+  # if psi_dict[key]["|psi^2|"] >0 :
+    # print(psi_dict[key]["band_en"],psi_dict[key]["|psi^2|"],psi_dict[key]["state weights"],psi_dict[key]["state ids"], psi_dict[key]["state types"], psi_dict[key]["atoms"])
+
   # print("atom id:",state_atom_id,"atom type:",state_atom_type,"state weight:",state_weight,"state id:",state_id,"orbital type:",state_orbital_type)
 
 
 # print(data)
 
-#band_id = len
 for band_idx in range(band_id): 
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
-  
-  # for k_idx in range(nkpoints):
-    #SIGMA
-  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*50,c="wheat")
-    #PI
-  plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*50,c="salmon")
-    # d
-  plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*50,c="lightblue")
-    # unknown
-  plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*50,c="teal")
+  #SIGMA
+  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*50,c="magenta",label=r"$\sigma$",alpha=.7)
+   #PI
+  # plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*50,c="salmon",label=r"$\pi$",alpha=.7)
+  # d
+  # plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*50,c="lightblue",label=r"$d$",alpha=.7)
+  # unknown
+  # plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*50,c="wheat")
+
+# plt.legend(["bands",r"$\sigma$",r"$\pi$",r"$d$"])
+# plt.legend()
+
+for h_i in highsymm:
+  plt.vlines(h_i,e_min,e_max,linestyle="dashed",lw=0.75,color='k',alpha=.9)
+
+plt.ylim(e_min,e_max)
+plt.xlim(np.min(data[0,:,0,0]),np.max(data[0,:,0,0]))
+plt.ylabel(r"$E - E_\mathrm{F} \ \left[ \mathrm{eV} \right]$")
+plt.xticks(highsymm, (r"$\Gamma$",r"$\mathrm{K}$",r"$\mathrm{M}$",r"$\Gamma$"))
 plt.show()
-# plt.savefig("/Users/Nevensky/Desktop/test.pdf")
+# plt.savefig(file.strip(".out")+".pdf")
