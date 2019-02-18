@@ -69,10 +69,9 @@ orbital_type = {
 
 # file = sys.argv[1]
 # file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
-file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/IrCsC8.proj.out"
-
-
+file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
 
 e_min = -4
 e_max = 4
@@ -87,16 +86,22 @@ ncontribs = 4 # sigma, pi, d, other
 # nwfcs = 8
 
 #CsC8
-highsymm = [0.0000, 0.6667, 1.0000, 1.5773]
-fermi_en = -0.6767
-nbands = 100
-nwfcs = 45
+# highsymm = [0.0000, 0.6667, 1.0000, 1.5773]
+# fermi_en = -0.6767
+# nbands = 100
+# nwfcs = 45
 
 #CsC8 / Ir(111)
 # highsymm = [0.0000, 0.5774, 0.9107, 1.5773]
 # fermi_en = 5.6936
 # nbands = 300
 # nwfcs = 180
+
+#LiC6
+highsymm = [0.0000, 0.6389, 0.9583, 1.5116]
+fermi_en = -1.3981
+nbands = 100
+nwfcs = 29
 
 def saveState():
   a = ln.replace("psi =","+").split("+")
@@ -185,15 +190,16 @@ with open(file, "r") as f:
       if state_atom_types != []:
         state_atom_types = np.asarray(state_atom_types)[:,1].tolist()
 
-      condition = True
+      # condition = True
       # Cs-Cs, C-Cs
       # condition = "Cs" in state_atom_types
       # C-C
-      # condition = ("C" in state_atom_types and "Ir" not in state_atom_types and "Cs" not in state_atom_types)
+      # condition = ("C" in state_atom_types and "Ir" not in state_atom_types and "Cs" not in state_atom_types and "Li" not in state_atom_types)
       # Cs-Ir, Cs-Cs
       #condition = ((("Cs" in state_atom_types and "Ir" not in state_atom_types) or ("Ir" in state_atom_types and "Cs" in state_atom_types)) and "C" not in state_atom_types)
       # Cs-C, Cs-Cs
       #condition = ((("Cs" in state_atom_types and "C" not in state_atom_types) or ("C" in state_atom_types and "Cs" in state_atom_types)) and "Ir" not in state_atom_types)
+      condition = (("Li" in state_atom_types and "C" not in state_atom_types) or ("Li" in state_atom_types and "C" in state_atom_types))
       if condition:
         for st,sw,sa in zip(state_types,state_weights,state_atom_types):
           if st=="s":
