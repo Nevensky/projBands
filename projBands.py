@@ -71,7 +71,8 @@ orbital_type = {
 # file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/IrCsC8.proj.out"
-file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
+# file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
+file = "/Users/nevensky/Desktop/vito/LiC2/LiC2.proj.out"
 
 e_min = -4
 e_max = 4
@@ -98,10 +99,18 @@ ncontribs = 4 # sigma, pi, d, other
 # nwfcs = 180
 
 #LiC6
-highsymm = [0.0000, 0.6389, 0.9583, 1.5116]
-fermi_en = -1.3981
+# highsymm = [0.0000, 0.6389, 0.9583, 1.5116]
+# fermi_en = -1.3981
+# nbands = 100
+# nwfcs = 29
+
+#LiC2
+highsymm = [0.0000,0.6755,1.0132,1.5982]
+fermi_en = -1.6159
 nbands = 100
-nwfcs = 29
+nwfcs = 13
+nkpoints = 200
+
 
 def saveState():
   a = ln.replace("psi =","+").split("+")
@@ -328,15 +337,30 @@ for key in psi_dict_keys:
 
 # print(data)
 
+# export for mathematica
+try:
+  import os
+  # os.makedirs("/Users/nevensky/Desktop/vito/LiC2/projections")
+  os.makedirs("/Users/nevensky/Desktop/vito/LiC2/projections/bands")
+  os.makedirs("/Users/nevensky/Desktop/vito/LiC2/projections/sigma")
+  os.makedirs("/Users/nevensky/Desktop/vito/LiC2/projections/pi")
+  os.makedirs("/Users/nevensky/Desktop/vito/LiC2/projections/d")
+except:
+  pass
+
 for band_idx in range(band_id): 
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
+  np.savetxt("/Users/nevensky/Desktop/vito/LiC2/projections/bands/band_{}.dat".format(str(band_idx)),data[band_idx,:,0:2,0])
   #SIGMA
   plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*100,c="magenta",label=r"$\sigma$",alpha=.7)
-   #PI
+  np.savetxt("/Users/nevensky/Desktop/vito/LiC2/projections/sigma/band_{}.dat".format(str(band_idx)),data[band_idx,:,0:3,0])
+  # PI
   plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*100,c="salmon",label=r"$\pi$",alpha=.7)
+  np.savetxt("/Users/nevensky/Desktop/vito/LiC2/projections/pi/band_{}.dat".format(str(band_idx)),data[band_idx,:,0:3,1])
   # d
   plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*100,c="lightblue",label=r"$d$",alpha=.7)
+  np.savetxt("/Users/nevensky/Desktop/vito/LiC2/projections/d/band_{}.dat".format(str(band_idx)),data[band_idx,:,0:3,2])
   # unknown
   # plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*100,c="wheat")
 
@@ -346,6 +370,7 @@ for band_idx in range(band_id):
 for h_i in highsymm:
   plt.vlines(h_i,e_min,e_max,linestyle="dashed",lw=0.75,color='k',alpha=.9)
 
+plt.hlines(highsymm[0],highsymm[-1],0,lw=0.75,color='k',alpha=.9)
 plt.ylim(e_min,e_max)
 plt.xlim(np.min(data[0,:,0,0]),np.max(data[0,:,0,0]))
 plt.ylabel(r"$E - E_\mathrm{F} \ \left[ \mathrm{eV} \right]$")
