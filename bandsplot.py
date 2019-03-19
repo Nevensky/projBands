@@ -12,6 +12,8 @@ def main():
 	BandPlot("/Users/Nevensky/Desktop/vito/CsC8/bandsplot.dat.gnu",-0.6767)
 	#CsC8_Ir111
 	BandPlot("/Users/Nevensky/Desktop/vito/CsC8_Ir111/bandsplot.dat.gnu",5.6936)
+	#LiC2
+	BandPlot("/Users/Nevensky/Desktop/vito/LiC2/bandsplot.dat.gnu",-1.6159)
 
 class BandPlot():
 	def __init__(self,fname,fermi_en,e_min=-5,e_max=5):

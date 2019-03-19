@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 # plt.style.use("ggplot")
 
 """Orbital Order
@@ -71,7 +72,15 @@ orbital_type = {
 # file = "/Users/nevensky/Desktop/vito/graphene/gr.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/IrCsC8.proj.out"
-file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
+# file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
+# file = "/Users/nevensky/Desktop/vito/LiC2/LiC2.proj.out"
+
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.17.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.37.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.57.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.77.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.97.proj.out"
+file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_4.17.proj.out"
 
 e_min = -4
 e_max = 4
@@ -97,11 +106,30 @@ ncontribs = 4 # sigma, pi, d, other
 # nbands = 300
 # nwfcs = 180
 
-#LiC6
-highsymm = [0.0000, 0.6389, 0.9583, 1.5116]
-fermi_en = -1.3981
-nbands = 100
-nwfcs = 29
+#CsC8 / Ir(111) distances
+highsymm= [0.0000,0.6667,1.0000,1.5773] # svi isti
+# fermi_en = 5.7247 # d(CsIr)=3.17
+# fermi_en = 5.7578 # d(CsIr)=3.37
+# fermi_en = 5.7933 # d(CsIr)=3.57
+# fermi_en = 5.8666 # d(CsIr)=3.77
+# fermi_en = 5.8963 # d(CsIr)=3.97
+fermi_en = 5.9131 # d(CsIr)=4.17
+nbands = 300
+nwfcs = 180
+
+# #LiC6
+# highsymm = [0.0000,0.6756,1.0135,1.5986]
+# fermi_en = -1.4736
+# nbands = 100
+# nwfcs = 29
+
+#LiC2
+# highsymm = [0.0000,0.6755,1.0132,1.5982]
+# fermi_en = -1.6159
+# nbands = 100
+# nwfcs = 13
+# nkpoints = 200
+
 
 def saveState():
   a = ln.replace("psi =","+").split("+")
@@ -190,7 +218,7 @@ with open(file, "r") as f:
       if state_atom_types != []:
         state_atom_types = np.asarray(state_atom_types)[:,1].tolist()
 
-      # condition = True
+      condition = True
       # Cs-Cs, C-Cs
       # condition = "Cs" in state_atom_types
       # C-C
@@ -199,7 +227,10 @@ with open(file, "r") as f:
       #condition = ((("Cs" in state_atom_types and "Ir" not in state_atom_types) or ("Ir" in state_atom_types and "Cs" in state_atom_types)) and "C" not in state_atom_types)
       # Cs-C, Cs-Cs
       #condition = ((("Cs" in state_atom_types and "C" not in state_atom_types) or ("C" in state_atom_types and "Cs" in state_atom_types)) and "Ir" not in state_atom_types)
-      condition = (("Li" in state_atom_types and "C" not in state_atom_types) or ("Li" in state_atom_types and "C" in state_atom_types))
+      #
+      # condition = (("Li" in state_atom_types and "C" not in state_atom_types) or ("Li" in state_atom_types and "C" in state_atom_types))
+      # C-C pi
+      # condition = ("C" in state_atom_types and "Li" not in state_atom_types)
       if condition:
         for st,sw,sa in zip(state_types,state_weights,state_atom_types):
           if st=="s":
@@ -208,6 +239,10 @@ with open(file, "r") as f:
             contribs[0] += sw
           elif st=="pz":
             contribs[1] += sw
+            # if sa=="Cs":
+            #   contribs[0] += sw
+            # else:
+            #   contribs[1] += sw
           # elif st=="dz2":
             # contribs[0] += sw
           # elif (st=="dzx" or st=="dzy"):
@@ -328,15 +363,18 @@ for key in psi_dict_keys:
 
 # print(data)
 
+# data summed_over_bands (needs to be normalized)
+# summed_data = np.zeros([nbands,nkpoints,3,ncontribs])
+
 for band_idx in range(band_id): 
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
-  #SIGMA
-  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*100,c="magenta",label=r"$\sigma$",alpha=.7)
-   #PI
-  plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*100,c="salmon",label=r"$\pi$",alpha=.7)
   # d
-  plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*100,c="lightblue",label=r"$d$",alpha=.7)
+  plt.scatter(data[band_idx,:,0,2],data[band_idx,:,1,2],s=data[band_idx,:,2,2]*100,c="lightblue",label=r"$d$",alpha=.6)
+  #SIGMA
+  plt.scatter(data[band_idx,:,0,0],data[band_idx,:,1,0],s=data[band_idx,:,2,0]*100,c="magenta",label=r"$\sigma$",alpha=.6)
+   #PI
+  plt.scatter(data[band_idx,:,0,1],data[band_idx,:,1,1],s=data[band_idx,:,2,1]*100,c="salmon",label=r"$\pi$",alpha=.6)
   # unknown
   # plt.scatter(data[band_idx,:,0,3],data[band_idx,:,1,3],s=data[band_idx,:,2,3]*100,c="wheat")
 
@@ -346,9 +384,22 @@ for band_idx in range(band_id):
 for h_i in highsymm:
   plt.vlines(h_i,e_min,e_max,linestyle="dashed",lw=0.75,color='k',alpha=.9)
 
+plt.hlines(highsymm[0],highsymm[-1],0,lw=0.75,color='k',alpha=.9)
 plt.ylim(e_min,e_max)
 plt.xlim(np.min(data[0,:,0,0]),np.max(data[0,:,0,0]))
 plt.ylabel(r"$E - E_\mathrm{F} \ \left[ \mathrm{eV} \right]$")
 plt.xticks(highsymm, (r"$\Gamma$",r"$\mathrm{K}$",r"$\mathrm{M}$",r"$\Gamma$"))
 plt.show()
 # plt.savefig(file.strip(".out")+".pdf")
+
+# def densityPlot(x,y,z):
+#    """ density plot with x,y,z arrays of equal size"""
+#   x=np.array(x)
+#   y=np.array(y)
+#   z=np.array(z)
+#   N = int(len(z)**.5)
+#   z = z.reshape(N, N)
+#   plt.imshow(z+10, extent=(np.amin(x), np.amax(x), np.amin(y), np.amax(y)),
+#         cmap=cm.hot)
+#   plt.colorbar()
+#   plt.show()
