@@ -3,7 +3,11 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib
+matplotlib.use('Qt5Agg')
 # plt.style.use("ggplot")
+
+# plt.rcParams.update({'font.size': 22})
 
 """Orbital Order
  Order of m-components for each l in the output:
@@ -73,17 +77,23 @@ orbital_type = {
 # file = "/Users/nevensky/Desktop/vito/CsC8/CsC8.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/IrCsC8.proj.out"
 # file = "/Users/nevensky/Desktop/vito/LiC6/LiC6.proj.out"
-# file = "/Users/nevensky/Desktop/vito/LiC2/LiC2.proj.out"
+# file = "/Users/nevensky/Desktop/vito/LiC2/publikacija/LiC2.proj.out"
+# file = "/Users/nevensky/Desktop/vito/LiC6/publikacija/LiC6.proj.out"
 
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.17.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.37.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.57.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.77.proj.out"
 # file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_3.97.proj.out"
-file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_4.17.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/distances/CsC8_Ir111_4.17.proj.out"
+# file = "/Users/nevensky/Desktop/vito/CsC8_Ir111/inverted/IrCsC8.proj.out"
 
-e_min = -4
-e_max = 4
+# file = "/Users/nevensky/Desktop/vito/KC8_Au111/hollow/KC8_Au111.hollow.proj.out"
+
+file = "/Users/nevensky/Desktop/vito/LiC2_Al2O3/LiC2_Al2O3.proj.out"
+
+e_min = -5
+e_max = 5
 
 nkpoints = 150
 ncontribs = 4 # sigma, pi, d, other
@@ -107,28 +117,51 @@ ncontribs = 4 # sigma, pi, d, other
 # nwfcs = 180
 
 #CsC8 / Ir(111) distances
-highsymm= [0.0000,0.6667,1.0000,1.5773] # svi isti
+# highsymm= [0.0000,0.6667,1.0000,1.5773] # svi isti
 # fermi_en = 5.7247 # d(CsIr)=3.17
 # fermi_en = 5.7578 # d(CsIr)=3.37
 # fermi_en = 5.7933 # d(CsIr)=3.57
 # fermi_en = 5.8666 # d(CsIr)=3.77
 # fermi_en = 5.8963 # d(CsIr)=3.97
-fermi_en = 5.9131 # d(CsIr)=4.17
-nbands = 300
-nwfcs = 180
+# fermi_en = 5.9131 # d(CsIr)=4.17
+# fermi_en = 6.2038 # inverted
+# nbands = 300
+# nwfcs = 180
 
-# #LiC6
-# highsymm = [0.0000,0.6756,1.0135,1.5986]
-# fermi_en = -1.4736
+#KC8 / Au(111)
+highsymm = [0.0000,0.6667,1.0000,1.5773]
+fermi_en = -2.0461
+nbands = 300
+nwfcs = 84
+nkpoints = 150
+
+#KC8 / Au(111)
+# highsymm = [0.0000,0.6667,1.0000,1.5773]
+# fermi_en = 5.8818
+# nbands = 300
+# nwfcs = 175
+# nkpoints = 150
+
+# # #LiC6
+# highsymm = [0.0000,0.6667,1.0000,1.5774]
+# fermi_en = -0.9745
 # nbands = 100
 # nwfcs = 29
+# nkpoints = 150
 
 #LiC2
-# highsymm = [0.0000,0.6755,1.0132,1.5982]
-# fermi_en = -1.6159
+# highsymm = [0.0000,0.6667,1.0000,1.5774]
+# fermi_en = -1.55 # 
 # nbands = 100
 # nwfcs = 13
 # nkpoints = 200
+
+#CaC6
+# highsymm = [0.0000,0.6756,1.0135,1.5986]
+# fermi_en = -0.4283
+# nbands = 100
+# nwfcs = 32
+# nkpoints = 150
 
 
 def saveState():
@@ -218,19 +251,20 @@ with open(file, "r") as f:
       if state_atom_types != []:
         state_atom_types = np.asarray(state_atom_types)[:,1].tolist()
 
-      condition = True
+      # condition = True
       # Cs-Cs, C-Cs
-      # condition = "Cs" in state_atom_types
+      # condition = "Li" in state_atom_types
       # C-C
       # condition = ("C" in state_atom_types and "Ir" not in state_atom_types and "Cs" not in state_atom_types and "Li" not in state_atom_types)
       # Cs-Ir, Cs-Cs
       #condition = ((("Cs" in state_atom_types and "Ir" not in state_atom_types) or ("Ir" in state_atom_types and "Cs" in state_atom_types)) and "C" not in state_atom_types)
       # Cs-C, Cs-Cs
       #condition = ((("Cs" in state_atom_types and "C" not in state_atom_types) or ("C" in state_atom_types and "Cs" in state_atom_types)) and "Ir" not in state_atom_types)
-      #
+      # Li-Li, Li-C
       # condition = (("Li" in state_atom_types and "C" not in state_atom_types) or ("Li" in state_atom_types and "C" in state_atom_types))
       # C-C pi
       # condition = ("C" in state_atom_types and "Li" not in state_atom_types)
+      condition = ("Al" not in state_atom_types and "O" not in state_atom_types)
       if condition:
         for st,sw,sa in zip(state_types,state_weights,state_atom_types):
           if st=="s":
@@ -366,6 +400,8 @@ for key in psi_dict_keys:
 # data summed_over_bands (needs to be normalized)
 # summed_data = np.zeros([nbands,nkpoints,3,ncontribs])
 
+# plt.figure(figsize=(12,10))
+
 for band_idx in range(band_id): 
   # black bands
   plt.plot(data[band_idx,:,0,0],data[band_idx,:,1,0],"k-")
@@ -391,7 +427,7 @@ plt.ylabel(r"$E - E_\mathrm{F} \ \left[ \mathrm{eV} \right]$")
 plt.xticks(highsymm, (r"$\Gamma$",r"$\mathrm{K}$",r"$\mathrm{M}$",r"$\Gamma$"))
 plt.show()
 # plt.savefig(file.strip(".out")+".pdf")
-
+plt.close()
 # def densityPlot(x,y,z):
 #    """ density plot with x,y,z arrays of equal size"""
 #   x=np.array(x)
